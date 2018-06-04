@@ -14,8 +14,14 @@
             android:paddingTop="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="설문을 완료하였습니다.~~~~"
+            android:id="@+id/textView"
             android:paddingBottom="50dp"/>
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="TextView" />
 
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>
