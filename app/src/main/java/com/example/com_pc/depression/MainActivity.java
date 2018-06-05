@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -19,12 +20,16 @@ import android.widget.Toast;
 import com.example.com_pc.depression.DiagnosisTest.diagnosisActivity;
 import com.example.com_pc.depression.Password.HomePage;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
@@ -66,12 +71,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        db = FirebaseFirestore.getInstance();
 
+        //========================================== Check the Id
         if (TextUtils.isEmpty(uuid)) {
             Toast.makeText(MainActivity.this, "Id empty", Toast.LENGTH_SHORT).show();
             //================================ Get the number of user
-            db = FirebaseFirestore.getInstance();
-            db.collection("users")
+            /*db.collection("users")
                     .get()
                     .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                         @Override
@@ -87,17 +93,58 @@ public class MainActivity extends AppCompatActivity {
                                 Toast.makeText(MainActivity.this, "failed", Toast.LENGTH_SHORT).show();
                             }
                         }
-                    });
+                    });*/
 
             //================================ Add the number and the uuid
 
             for (int i = 0; i < 10; i++) {
-                uuid = UUID.randomUUID().toString() + String.valueOf(Idnum);
+                uuid = UUID.randomUUID().toString();
             }
+            //============================== Make a document in collection
+            //Make a HashMap<>
+            Map<String, Object> newUser = new HashMap<>();
+            newUser.put("user_id", uuid);
+
+            // Input data in firestore
+            db.collection("users").document(uuid)
+                    .set(newUser)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Toast.makeText(MainActivity.this, "Added new user", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.d("Error", e.getMessage());
+                        }
+                    });
+            //==================================================================
 
         }
+        //==================================================================
+        //============================== Make a document in collection
+        //Make a HashMap<>
+        Map<String, Object> newUser = new HashMap<>();
+        newUser.put("user_id", uuid);
 
-        //================================
+        // Input data in firestore
+        db.collection("users").document(uuid)
+                .set(newUser)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Toast.makeText(MainActivity.this, "Added new user", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d("Error", e.getMessage());
+                    }
+                });
+        //==================================================================
 
         TextView manualButton = (TextView)findViewById(R.id.manualButton);
         manualButton.setOnClickListener(new View.OnClickListener(){
