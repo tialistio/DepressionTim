@@ -4,22 +4,36 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.com_pc.depression.DiagnosisTest.diagnosisActivity;
 import com.example.com_pc.depression.Password.HomePage;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
+    public static String uuid;
+
+    //=================================================
+    public static int Idnum, count;
+    FirebaseFirestore db;
+    //=================================================
     public static String deviceId;
     //안드로이드 UUID 고유번호 가져오기
     //deviceid, serialnumber,androidid를 추출하여 string을 hash값으로 변경한 int형 변수
@@ -38,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
             deviceId = deviceUuid.toString();
             return deviceId;
         } catch (SecurityException e) {
-            e.printStackTrace();s
+            e.printStackTrace();
         }
        return "";
     }
@@ -52,6 +66,38 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (TextUtils.isEmpty(uuid)) {
+            Toast.makeText(MainActivity.this, "Id empty", Toast.LENGTH_SHORT).show();
+            //================================ Get the number of user
+            db = FirebaseFirestore.getInstance();
+            db.collection("users")
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                for (DocumentSnapshot document : task.getResult()) {
+                                    count++;
+                                }
+                                Idnum = count + 1;
+                                Toast.makeText(MainActivity.this, "get the user count = " + Idnum, Toast.LENGTH_SHORT).show();
+                            } else {
+                                System.out.println("Data fetched failed");
+                                Toast.makeText(MainActivity.this, "failed", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+
+            //================================ Add the number and the uuid
+
+            for (int i = 0; i < 10; i++) {
+                uuid = UUID.randomUUID().toString() + String.valueOf(Idnum);
+            }
+
+        }
+
+        //================================
 
         TextView manualButton = (TextView)findViewById(R.id.manualButton);
         manualButton.setOnClickListener(new View.OnClickListener(){

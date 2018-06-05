@@ -25,7 +25,6 @@
         <activity android:name=".BDITest.bdiActivity" />
         <activity android:name=".BDITest.bdiFinish" />
         <activity android:name=".BDITest.bdiStart" />
-
     </application>
 
 </manifest>
