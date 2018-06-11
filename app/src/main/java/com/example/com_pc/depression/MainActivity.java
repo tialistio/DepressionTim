@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
             deviceId = deviceUuid.toString();
             return deviceId;
         } catch (SecurityException e) {
-            e.printStackTrace();s
+            e.printStackTrace();
         }
        return "";
     }
