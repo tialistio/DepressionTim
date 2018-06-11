@@ -23,6 +23,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -32,14 +33,26 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.xml.transform.Source;
+
 public class MainActivity extends AppCompatActivity {
-    public static String uuid;
+    public static String uuid = "";
+
+    //================================================
+    private static final String PREFS_UID = "Userid";
+    private final String Defaultuser_id = "";
+    public static String user_id;
 
     //=================================================
     public static int Idnum, count;
+    public int intcounter;
+    public String counter;
     FirebaseFirestore db;
+    //public static String idmake;
+    //public static String user_id;
     //=================================================
     public static String deviceId;
+
     //안드로이드 UUID 고유번호 가져오기
     //deviceid, serialnumber,androidid를 추출하여 string을 hash값으로 변경한 int형 변수
     //3개를 UUID 클래스의 UUID 생성자를 이용해서 생선한 문자열을 고유키를 생성.
@@ -49,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
         final String tmDevice, tmSerial, androidId;
         try {
             tmDevice = "" + tm.getDeviceId();
-            tmSerial =  "" + tm.getSimSerialNumber();
+            tmSerial = "" + tm.getSimSerialNumber();
             androidId = "" + android.provider.Settings.Secure.getString(getContentResolver(),
                     android.provider.Settings.Secure.ANDROID_ID);
             UUID deviceUuid = new UUID(androidId.hashCode(),
@@ -59,22 +72,29 @@ public class MainActivity extends AppCompatActivity {
         } catch (SecurityException e) {
             e.printStackTrace();
         }
-       return "";
+        return "";
     }
+
     //
-    public boolean onCreateOptionsMenu(Menu menu){
+    public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu,menu);
+        inflater.inflate(R.menu.menu, menu);
         return true;
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         db = FirebaseFirestore.getInstance();
 
+        //===========================================
+        SharedPreferences settings = getSharedPreferences(PREFS_UID, Context.MODE_PRIVATE);
+        //========================get the value
+        user_id = settings.getString(PREFS_UID, Defaultuser_id);
+        Toast.makeText(MainActivity.this, "Id = " + user_id, Toast.LENGTH_SHORT).show();
         //========================================== Check the Id
-        if (TextUtils.isEmpty(uuid)) {
+        if (TextUtils.isEmpty(user_id)) {
             Toast.makeText(MainActivity.this, "Id empty", Toast.LENGTH_SHORT).show();
             //================================ Get the number of user
             /*db.collection("users")
@@ -100,12 +120,21 @@ public class MainActivity extends AppCompatActivity {
             for (int i = 0; i < 10; i++) {
                 uuid = UUID.randomUUID().toString();
             }
+            //================
+
             //============================== Make a document in collection
             //Make a HashMap<>
             Map<String, Object> newUser = new HashMap<>();
             newUser.put("user_id", uuid);
+            newUser.put("counter", 0);
+            //=======================put it into preferences
+            settings = getSharedPreferences(PREFS_UID, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = settings.edit();
 
-            // Input data in firestore
+            editor.putString(PREFS_UID, uuid);
+            editor.commit();
+
+            //======================Input id in firestore
             db.collection("users").document(uuid)
                     .set(newUser)
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -124,43 +153,72 @@ public class MainActivity extends AppCompatActivity {
 
         }
         //==================================================================
-        //============================== Make a document in collection
-        //Make a HashMap<>
-        Map<String, Object> newUser = new HashMap<>();
-        newUser.put("user_id", uuid);
-
-        // Input data in firestore
-        db.collection("users").document(uuid)
-                .set(newUser)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Toast.makeText(MainActivity.this, "Added new user", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.d("Error", e.getMessage());
-                    }
-                });
+        //============================== if uuid not null
+        Toast.makeText(MainActivity.this, "Id not null", Toast.LENGTH_SHORT).show();
         //==================================================================
 
-        TextView manualButton = (TextView)findViewById(R.id.manualButton);
-        manualButton.setOnClickListener(new View.OnClickListener(){
+        TextView manualButton = (TextView) findViewById(R.id.manualButton);
+        manualButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view){
-                Intent manualIntent = new Intent(MainActivity.this,manualActivity.class);
+            public void onClick(View view) {
+                Intent manualIntent = new Intent(MainActivity.this, manualActivity.class);
                 MainActivity.this.startActivity(manualIntent);
             }
         });
-        TextView diagButton = (TextView)findViewById(R.id.diagButton);
-        diagButton.setOnClickListener(new View.OnClickListener(){
+        TextView diagButton = (TextView) findViewById(R.id.diagButton);
+        diagButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view){
-                Intent diagIntent = new Intent(MainActivity.this,diagnosisActivity.class);
+            public void onClick(View view) {
+                get_counter();
+                Intent diagIntent = new Intent(MainActivity.this, diagnosisActivity.class);
                 MainActivity.this.startActivity(diagIntent);
             }
         });
+    }
+
+    public int get_counter() {
+        DocumentReference userRef = db.collection("users").document(user_id);
+
+        // check wether the data exist or not
+        userRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful()){
+                    //Document found in the offline cache
+                    DocumentSnapshot document = task.getResult();
+                    if(document.exists()){
+                        //Toast.makeText(MainActivity.this, "DocumentSnapshot data : " + document.getData(), Toast.LENGTH_SHORT).show();
+                        counter = document.getString("counter");
+
+                        //Toast.makeText(MainActivity.this, "counter : " + counter, Toast.LENGTH_SHORT).show();
+                    }
+                    else{
+                        Toast.makeText(MainActivity.this, "Document not found", Toast.LENGTH_SHORT).show();
+                    }
+
+
+                }
+                else{
+                    Toast.makeText(MainActivity.this, "get failde with" + task.getException(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        //========================= second way to get data
+        /*db.collection("users").document(user_id).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                String counter = task.getResult().getString("counter");
+                Toast.makeText(MainActivity.this, "counter : " + counter, Toast.LENGTH_SHORT).show();
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(MainActivity.this, "get failde with" + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });*/
+        intcounter = Integer.parseInt(counter);
+        return intcounter;
     }
 }

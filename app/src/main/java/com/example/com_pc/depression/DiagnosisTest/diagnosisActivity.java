@@ -1,28 +1,56 @@
 package com.example.com_pc.depression.DiagnosisTest;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.com_pc.depression.MainActivity;
 import com.example.com_pc.depression.R;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class diagnosisActivity extends AppCompatActivity {
-
+    private  static final String PREFS_UID = "Userid";
+    private final String Defaultuser_id = "";
+    public static String user_id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_diagnosis);
+        //========================================== get the user id
+        SharedPreferences settings = getSharedPreferences(PREFS_UID, Context.MODE_PRIVATE);
+        //========================get the value
+        user_id = settings.getString(PREFS_UID, Defaultuser_id);
+        //========================== upload data
+
 
         TextView nextBtn = (TextView)findViewById(R.id.diagBtn);
         nextBtn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
+                try{
+                    upload_data();
+                    Toast.makeText(diagnosisActivity.this, "Id = " + user_id +" succsess", Toast.LENGTH_SHORT).show();
+                }
+                catch (Exception e){
+                    Toast.makeText(diagnosisActivity.this, "upload failed", Toast.LENGTH_SHORT).show();
+                }
+
+                //======================================
+
                 Intent bdiStart = new Intent(diagnosisActivity.this, com.example.com_pc.depression.BDITest.bdiStart.class);
                 diagnosisActivity.this.startActivity(bdiStart);
             }
@@ -290,6 +318,40 @@ public class diagnosisActivity extends AppCompatActivity {
                 RadioButton rg14nBtn = (RadioButton) findViewById(id);
             }
         });
+    }
+//======================================= save data in database function
+    public void save_data(String questionnum, int answer){
+
+        FirebaseFirestore db;
+        db = FirebaseFirestore.getInstance();
+
+        Map<String, Object> newvalue = new HashMap<>();
+        newvalue.put(questionnum, answer);
+
+        db.collection("users").document(user_id).collection("user_data").document("user_information").update(newvalue);
+    }
+
+    //==================================== set database
+    public void set_data(String questionnum, int answer){
+
+        FirebaseFirestore db;
+        db = FirebaseFirestore.getInstance();
+
+        Map<String, Object> newvalue = new HashMap<>();
+        newvalue.put(questionnum, answer);
+
+        db.collection("users").document(user_id).collection("user_data").document("user_information").set(newvalue);
+    }
+//======================================= upload data to database
+    public void upload_data(){
+        EditText agein = (EditText)findViewById(R.id.edinputage);
+        String ages = agein.getText().toString();
+        int age = Integer.parseInt(ages);
+        Toast.makeText(diagnosisActivity.this, String.valueOf(age), Toast.LENGTH_SHORT).show();
+
+        //======================= upload data
+        set_data("age", age);
+
     }
 }
 
