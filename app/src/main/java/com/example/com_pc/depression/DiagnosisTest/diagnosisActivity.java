@@ -26,6 +26,11 @@ public class diagnosisActivity extends AppCompatActivity {
     private final String Defaultuser_id = "";
     public static String user_id;
 
+    public static int radioButtonID = 0;
+    public static int selectedId = 0;
+    public static String selected ="";
+    RadioButton radioButton ;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -320,7 +325,18 @@ public class diagnosisActivity extends AppCompatActivity {
         });
     }
 //======================================= save data in database function
-    public void save_data(String questionnum, int answer){
+    public void save_data(String questionnum, String answer){
+
+        FirebaseFirestore db;
+        db = FirebaseFirestore.getInstance();
+
+        Map<String, Object> newvalue = new HashMap<>();
+        newvalue.put(questionnum, answer);
+
+        db.collection("users").document(user_id).collection("user_data").document("user_information").update(newvalue);
+    }
+    //=============================== save boolean
+    public void save_data(String questionnum, Boolean answer){
 
         FirebaseFirestore db;
         db = FirebaseFirestore.getInstance();
@@ -347,11 +363,109 @@ public class diagnosisActivity extends AppCompatActivity {
         EditText agein = (EditText)findViewById(R.id.edinputage);
         String ages = agein.getText().toString();
         int age = Integer.parseInt(ages);
-        Toast.makeText(diagnosisActivity.this, String.valueOf(age), Toast.LENGTH_SHORT).show();
 
         //======================= upload data
         set_data("age", age);
 
+        // get the radio button value question 1
+        RadioGroup rg1 = (RadioGroup)findViewById(R.id.rg1);
+        radioButtonID = rg1.getCheckedRadioButtonId();
+        radioButton = (RadioButton)findViewById(radioButtonID);
+
+       String value = radioButton.getText().toString();
+       if(value.equals("남")){
+           value = "male";
+       }
+       else {
+           value = "female";
+       }
+       save_data("gender", value);
+
+        //===================yes no question save
+        //Question 3
+        RadioGroup rg2 = (RadioGroup)findViewById(R.id.rg2);
+        radioButtonID = rg2.getCheckedRadioButtonId();
+        cek_value("smoking", radioButtonID);
+
+        //Question 4
+        RadioGroup rg3 = (RadioGroup)findViewById(R.id.rg3);
+        radioButtonID = rg3.getCheckedRadioButtonId();
+        cek_value("alcohol", radioButtonID);
+
+        //Question 5
+        RadioGroup rg4 = (RadioGroup)findViewById(R.id.rg4);
+        radioButtonID = rg4.getCheckedRadioButtonId();
+        cek_value("troubleWithClassmates", radioButtonID);
+
+        //Question 6
+        RadioGroup rg5 = (RadioGroup)findViewById(R.id.rg5);
+        radioButtonID = rg5.getCheckedRadioButtonId();
+        cek_value("loosingFriend", radioButtonID);
+
+        // Question 7
+        RadioGroup rg6 = (RadioGroup)findViewById(R.id.rg6);
+        radioButtonID = rg6.getCheckedRadioButtonId();
+        cek_value("troubleWithTeacher", radioButtonID);
+
+        //Question 8
+        RadioGroup rg7 = (RadioGroup)findViewById(R.id.rg7);
+        radioButtonID = rg7.getCheckedRadioButtonId();
+        cek_value("troubleWithSiblings", radioButtonID);
+
+        //Question 9
+        RadioGroup rg8 = (RadioGroup)findViewById(R.id.rg8);
+        radioButtonID = rg8.getCheckedRadioButtonId();
+        cek_value("arguingWithParents", radioButtonID);
+
+        //Question 10
+        RadioGroup rg9 = (RadioGroup)findViewById(R.id.rg9);
+        radioButtonID = rg9.getCheckedRadioButtonId();
+        cek_value("livingStandard", radioButtonID);
+
+        //Question 11
+
+
+        //Question 12
+        RadioGroup rg11 = (RadioGroup)findViewById(R.id.rg11);
+        radioButtonID = rg11.getCheckedRadioButtonId();
+        cek_value("seriouslyIll", radioButtonID);
+
+        //Question 13
+        RadioGroup rg12 = (RadioGroup)findViewById(R.id.rg12);
+        radioButtonID = rg12.getCheckedRadioButtonId();
+        cek_value("familyMemberIll", radioButtonID);
+
+        //Question 14
+        RadioGroup rg13 = (RadioGroup)findViewById(R.id.rg13);
+        radioButtonID = rg13.getCheckedRadioButtonId();
+        radioButton = (RadioButton)findViewById(radioButtonID);
+
+        value = radioButton.getText().toString();
+        if(value.equalsIgnoreCase("yes")){
+            value = "divorced";
+        }
+        else{
+            value = "married";
+        }
+        save_data("parentsMartialStatus", value);
+
+
+
+    }
+
+    public void cek_value(String question, int radioId){
+        radioButton = (RadioButton)findViewById(radioButtonID);
+        Boolean answr;
+
+        String value = radioButton.getText().toString();
+        if(value.equalsIgnoreCase("yes")){
+            answr = true;
+        }
+        else {
+            answr = false;
+        }
+
+        save_data(question, answr);
     }
 }
 

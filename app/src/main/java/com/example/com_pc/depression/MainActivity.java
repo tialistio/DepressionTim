@@ -169,7 +169,6 @@ public class MainActivity extends AppCompatActivity {
         diagButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                get_counter();
                 Intent diagIntent = new Intent(MainActivity.this, diagnosisActivity.class);
                 MainActivity.this.startActivity(diagIntent);
             }

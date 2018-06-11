@@ -20,6 +20,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -51,7 +53,7 @@ public class bdiActivity extends AppCompatActivity {
             public void onClick(View view){
                 bdiSum = 0;
                 upload_score();
-                //Toast.makeText(bdiActivity.this, "Id = " + selectedp, Toast.LENGTH_SHORT).show();
+                Toast.makeText(bdiActivity.this, "Id = " + user_id, Toast.LENGTH_SHORT).show();
                 Intent bdiIntent2 = new Intent(bdiActivity.this,bdiFinish.class);
                 bdiActivity.this.startActivity(bdiIntent2);
             }
@@ -241,12 +243,22 @@ public class bdiActivity extends AppCompatActivity {
         selected = String.valueOf(selectedId);
         bdi_save_data("Q21", selectedId);
         add_sum(selectedId);
+
+        bdi_save_data("score",bdiSum);
+
+        Date currentTime = Calendar.getInstance().getTime();
+        String date = currentTime.toString();
+        bdi_save_stringdata("date", date);
+
     }
 
 
 
     public void bdi_save_data(String questionnum, int answer){
 
+        if(answer==-1){
+            answer=0;
+        }
         FirebaseFirestore db;
         db = FirebaseFirestore.getInstance();
 
@@ -257,6 +269,17 @@ public class bdiActivity extends AppCompatActivity {
 
     }
 
+    public void bdi_save_stringdata(String questionnum, String answer){
+
+        FirebaseFirestore db;
+        db = FirebaseFirestore.getInstance();
+
+        Map<String, Object> newvalue = new HashMap<>();
+        newvalue.put(questionnum, answer);
+
+        db.collection("users").document(user_id).collection("BDI").document("answer").update(newvalue);
+
+    }
     public void add_sum(int score){
         bdiSum = bdiSum + score ;
     }
