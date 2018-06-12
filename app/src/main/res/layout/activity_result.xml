@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ResultActivity"
+    android:background="#ffffff">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:paddingTop="10dp"
+            android:id="@+id/chart_bar"
+            android:layout_width="370dp"
+            android:layout_height="215dp"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:background="#ffffff"
+            android:orientation="horizontal" />
+
+        <TextView
+            android:id="@+id/tt1"
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:layout_marginTop="30dp" />
+
+        <TextView
+            android:id="@+id/tt2"
+            android:layout_width="match_parent"
+            android:layout_height="38dp"
+            android:layout_marginTop="20dp" />
+
+        <TextView
+            android:id="@+id/tt3"
+            android:layout_width="match_parent"
+            android:layout_height="38dp"
+            android:layout_marginTop="20dp" />
+
+
+        <Button
+            android:id="@+id/resultbutton"
+            android:layout_width="100dp"
+            android:layout_height="36dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="70dp"
+            android:background="@color/colorPrimaryDark"
+            android:nestedScrollingEnabled="false"
+            android:text="이메일 전송하기"
+            android:textSize="13dp"
+            android:textColor="#ffffff"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+    </ScrollView>
+

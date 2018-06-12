@@ -13,8 +13,8 @@ public class bdiFinish extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bdifinish);
 
-        TextView textview = (TextView)findViewById(R.id.textView);
-        textview.setText("점수 : " + String.valueOf(bdiSum));
+        TextView textView1 = (TextView)findViewById(R.id.finishText);
+        textView1.setText("점수 : " + String.valueOf(bdiSum));
 
 
     }
