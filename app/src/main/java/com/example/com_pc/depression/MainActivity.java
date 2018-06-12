@@ -173,6 +173,16 @@ public class MainActivity extends AppCompatActivity {
                 MainActivity.this.startActivity(diagIntent);
             }
         });
+
+        //결과 확인 Intent 이동
+        TextView resultButton = (TextView)findViewById(R.id.resultButton);
+        resultButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                //Intent resultIntent = new Intent(MainActivity.this,ResultListActivity.class);
+                //MainActivity.this.startActivity(resultIntent);
+            }
+        });
     }
 
     public int get_counter() {
