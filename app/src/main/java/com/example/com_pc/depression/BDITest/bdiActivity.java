@@ -1,8 +1,12 @@
 package com.example.com_pc.depression.BDITest;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RadioButton;
@@ -10,819 +14,288 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.com_pc.depression.MainActivity;
 import com.example.com_pc.depression.R;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class bdiActivity extends AppCompatActivity {
+    private  static final String PREFS_UID = "Userid";
+    private final String Defaultuser_id = "";
+    public static String user_id;
+
+
     public static int bdiSum = 0;
+    public static int radioButtonID = 0;
+    public static int selectedId = 0;
+    public static String selected ="";
+    View radioButton ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bdi);
+        //========================================== get the user id
+        SharedPreferences settings = getSharedPreferences(PREFS_UID, Context.MODE_PRIVATE);
+        //========================get the value
+        user_id = settings.getString(PREFS_UID, Defaultuser_id);
+
+        //==================================================================================
         TextView bdiBtn = (TextView)findViewById(R.id.btnext_bdiBtn1);
         bdiBtn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
+                bdiSum = 0;
+                upload_score();
+                Toast.makeText(bdiActivity.this, "Id = " + user_id, Toast.LENGTH_SHORT).show();
                 Intent bdiIntent2 = new Intent(bdiActivity.this,bdiFinish.class);
                 bdiActivity.this.startActivity(bdiIntent2);
             }
         });
-        //1
-        final RadioGroup gr1 = (RadioGroup)findViewById(R.id.gr1);
-        Button bdibtn1_1 = (Button)findViewById(R.id.bdiBtn1_1);
-        Button bdibtn1_2 = (Button)findViewById(R.id.bdiBtn1_2);
-        Button bdibtn1_3 = (Button)findViewById(R.id.bdiBtn1_3);
-        Button bdibtn1_4 = (Button)findViewById(R.id.bdiBtn1_4);
-        bdibtn1_1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr1.getCheckedRadioButtonId();
-                RadioButton btnbdi1 = (RadioButton) findViewById(id);
-            }
-        });
-        bdibtn1_2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr1.getCheckedRadioButtonId();
-                RadioButton btnbdi2 = (RadioButton) findViewById(id);
-                bdiSum++;
-            }
-        });
-        bdibtn1_3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr1.getCheckedRadioButtonId();
-                RadioButton btnbdi3 = (RadioButton) findViewById(id);
-                bdiSum+=2;
-            }
-        });
-        bdibtn1_4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr1.getCheckedRadioButtonId();
-                RadioButton btnbdi4 = (RadioButton) findViewById(id);
-                bdiSum+=3;
-            }
-        });
+//============================================================================================
 
-        //2
-        final RadioGroup gr2 = (RadioGroup)findViewById(R.id.gr2);
-        Button bdibtn2_1 = (Button)findViewById(R.id.bdiBtn2_1);
-        Button bdibtn2_2 = (Button)findViewById(R.id.bdiBtn2_2);
-        Button bdibtn2_3 = (Button)findViewById(R.id.bdiBtn2_3);
-        Button bdibtn2_4 = (Button)findViewById(R.id.bdiBtn2_4);
-        bdibtn2_1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr2.getCheckedRadioButtonId();
-                RadioButton btnbdi1 = (RadioButton) findViewById(id);
-            }
-        });
-        bdibtn2_2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr2.getCheckedRadioButtonId();
-                RadioButton btnbdi2 = (RadioButton) findViewById(id);
-                bdiSum++;
-            }
-        });
-        bdibtn2_3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr2.getCheckedRadioButtonId();
-                RadioButton btnbdi3 = (RadioButton) findViewById(id);
-                bdiSum+=2;
-            }
-        });
-        bdibtn2_4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr2.getCheckedRadioButtonId();
-                RadioButton btnbdi4 = (RadioButton) findViewById(id);
-                bdiSum+=3;
-            }
-        });
+        //==========================================================================================
+    }
+    public String get_score(){
 
-        //3
-        final RadioGroup gr3 = (RadioGroup)findViewById(R.id.gr3);
-        Button bdibtn3_1 = (Button)findViewById(R.id.bdiBtn3_1);
-        Button bdibtn3_2 = (Button)findViewById(R.id.bdiBtn3_2);
-        Button bdibtn3_3 = (Button)findViewById(R.id.bdiBtn3_3);
-        Button bdibtn3_4 = (Button)findViewById(R.id.bdiBtn3_4);
-        bdibtn3_1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr3.getCheckedRadioButtonId();
-                RadioButton btnbdi1 = (RadioButton) findViewById(id);
-            }
-        });
-        bdibtn3_2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr3.getCheckedRadioButtonId();
-                RadioButton btnbdi2 = (RadioButton) findViewById(id);
-                bdiSum++;
+        RadioGroup gr21 = (RadioGroup)findViewById(R.id.gr21);
+        int radioButtonID = gr21.getCheckedRadioButtonId();
+        View radioButton = gr21.findViewById(radioButtonID);
+        int selectedId = gr21.indexOfChild(radioButton);
+        selected = String.valueOf(selectedId);
 
-            }
-        });
-        bdibtn3_3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr3.getCheckedRadioButtonId();
-                RadioButton btnbdi3 = (RadioButton) findViewById(id);
-                bdiSum+=2;
-            }
-        });
-        bdibtn3_4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr3.getCheckedRadioButtonId();
-                RadioButton btnbdi4 = (RadioButton) findViewById(id);
-                bdiSum+=3;
-            }
-        });
+        return selected;
+    }
 
-        //4
-        final RadioGroup gr4 = (RadioGroup)findViewById(R.id.gr4);
-        Button bdibtn4_1 = (Button)findViewById(R.id.bdiBtn4_1);
-        Button bdibtn4_2 = (Button)findViewById(R.id.bdiBtn4_2);
-        Button bdibtn4_3 = (Button)findViewById(R.id.bdiBtn4_3);
-        Button bdibtn4_4 = (Button)findViewById(R.id.bdiBtn4_4);
-        bdibtn4_1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr4.getCheckedRadioButtonId();
-                RadioButton btnbdi1 = (RadioButton) findViewById(id);
-            }
-        });
-        bdibtn4_2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr4.getCheckedRadioButtonId();
-                RadioButton btnbdi2 = (RadioButton) findViewById(id);
-                bdiSum++;
-            }
-        });
-        bdibtn4_3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr4.getCheckedRadioButtonId();
-                RadioButton btnbdi3 = (RadioButton) findViewById(id);
-                bdiSum+=2;
-            }
-        });
-        bdibtn4_4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr4.getCheckedRadioButtonId();
-                RadioButton btnbdi4 = (RadioButton) findViewById(id);
-                bdiSum+=3;
-            }
-        });
+    public void upload_score(){
 
-        //5
-        final RadioGroup gr5 = (RadioGroup)findViewById(R.id.gr5);
-        Button bdibtn5_1 = (Button)findViewById(R.id.bdiBtn5_1);
-        Button bdibtn5_2 = (Button)findViewById(R.id.bdiBtn5_2);
-        Button bdibtn5_3 = (Button)findViewById(R.id.bdiBtn5_3);
-        Button bdibtn5_4 = (Button)findViewById(R.id.bdiBtn5_4);
-        bdibtn5_1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr5.getCheckedRadioButtonId();
-                RadioButton btnbdi1 = (RadioButton) findViewById(id);
-            }
-        });
-        bdibtn5_2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr5.getCheckedRadioButtonId();
-                RadioButton btnbdi2 = (RadioButton) findViewById(id);
-                bdiSum++;
-            }
-        });
-        bdibtn5_3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr5.getCheckedRadioButtonId();
-                RadioButton btnbdi3 = (RadioButton) findViewById(id);
-                bdiSum+=2;
-            }
-        });
-        bdibtn5_4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr5.getCheckedRadioButtonId();
-                RadioButton btnbdi4 = (RadioButton) findViewById(id);
-                bdiSum+=3;
-            }
-        });
+        Date currentTime = Calendar.getInstance().getTime();
+        String date = currentTime.toString();
+        bdi_save_stringdata("date", date);
 
-        //6
-        final RadioGroup gr6 = (RadioGroup)findViewById(R.id.gr6);
-        Button bdibtn6_1 = (Button)findViewById(R.id.bdiBtn6_1);
-        Button bdibtn6_2 = (Button)findViewById(R.id.bdiBtn6_2);
-        Button bdibtn6_3 = (Button)findViewById(R.id.bdiBtn6_3);
-        Button bdibtn6_4 = (Button)findViewById(R.id.bdiBtn6_4);
-        bdibtn6_1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr6.getCheckedRadioButtonId();
-                RadioButton btnbdi1 = (RadioButton) findViewById(id);
-            }
-        });
-        bdibtn6_2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr6.getCheckedRadioButtonId();
-                RadioButton btnbdi2 = (RadioButton) findViewById(id);
-                bdiSum++;
-            }
-        });
-        bdibtn6_3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr6.getCheckedRadioButtonId();
-                RadioButton btnbdi3 = (RadioButton) findViewById(id);
-                bdiSum+=2;
-            }
-        });
-        bdibtn6_4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr6.getCheckedRadioButtonId();
-                RadioButton btnbdi4 = (RadioButton) findViewById(id);
-                bdiSum+=3;
-            }
-        });
+        RadioGroup gr1 = (RadioGroup)findViewById(R.id.gr1);
+        radioButtonID = gr1.getCheckedRadioButtonId();
+        radioButton = gr1.findViewById(radioButtonID);
+        selectedId = gr1.indexOfChild(radioButton);
+        selected = String.valueOf(selectedId);
+        bdi_save_data("Q1", selectedId);
+        add_sum(selectedId);
+        //Toast.makeText(bdiActivity.this, "anwser = "+selected, Toast.LENGTH_SHORT).show();
 
-        //7
-        final RadioGroup gr7 = (RadioGroup)findViewById(R.id.gr7);
-        Button bdibtn7_1 = (Button)findViewById(R.id.bdiBtn7_1);
-        Button bdibtn7_2 = (Button)findViewById(R.id.bdiBtn7_2);
-        Button bdibtn7_3 = (Button)findViewById(R.id.bdiBtn7_3);
-        Button bdibtn7_4 = (Button)findViewById(R.id.bdiBtn7_4);
-        bdibtn7_1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr7.getCheckedRadioButtonId();
-                RadioButton btnbdi1 = (RadioButton) findViewById(id);
-            }
-        });
-        bdibtn7_2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr7.getCheckedRadioButtonId();
-                RadioButton btnbdi2 = (RadioButton) findViewById(id);
-                bdiSum++;
-            }
-        });
-        bdibtn7_3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr7.getCheckedRadioButtonId();
-                RadioButton btnbdi3 = (RadioButton) findViewById(id);
-                bdiSum+=2;
-            }
-        });
-        bdibtn7_4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr7.getCheckedRadioButtonId();
-                RadioButton btnbdi4 = (RadioButton) findViewById(id);
-                bdiSum+=3;
-            }
-        });
+        RadioGroup gr2 = (RadioGroup)findViewById(R.id.gr2);
+        radioButtonID = gr2.getCheckedRadioButtonId();
+        radioButton = gr2.findViewById(radioButtonID);
+        selectedId = gr2.indexOfChild(radioButton);
+        selected = String.valueOf(selectedId);
+        bdi_save_data("Q2", selectedId);
+        add_sum(selectedId);
 
-        //8
-        final RadioGroup gr8 = (RadioGroup)findViewById(R.id.gr8);
-        Button bdibtn8_1 = (Button)findViewById(R.id.bdiBtn8_1);
-        Button bdibtn8_2 = (Button)findViewById(R.id.bdiBtn8_2);
-        Button bdibtn8_3 = (Button)findViewById(R.id.bdiBtn8_3);
-        Button bdibtn8_4 = (Button)findViewById(R.id.bdiBtn8_4);
-        bdibtn8_1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr8.getCheckedRadioButtonId();
-                RadioButton btnbdi1 = (RadioButton) findViewById(id);
-            }
-        });
-        bdibtn8_2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr8.getCheckedRadioButtonId();
-                RadioButton btnbdi2 = (RadioButton) findViewById(id);
-                bdiSum++;
-            }
-        });
-        bdibtn8_3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr8.getCheckedRadioButtonId();
-                RadioButton btnbdi3 = (RadioButton) findViewById(id);
-                bdiSum+=2;
-            }
-        });
-        bdibtn8_4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr8.getCheckedRadioButtonId();
-                RadioButton btnbdi4 = (RadioButton) findViewById(id);
-                bdiSum+=3;
-            }
-        });
+        RadioGroup gr3 = (RadioGroup)findViewById(R.id.gr3);
+        radioButtonID = gr3.getCheckedRadioButtonId();
+        radioButton = gr3.findViewById(radioButtonID);
+        selectedId = gr3.indexOfChild(radioButton);
+        selected = String.valueOf(selectedId);
+        bdi_save_data("Q3", selectedId);
+        add_sum(selectedId);
 
-        //9
-        final RadioGroup gr9 = (RadioGroup)findViewById(R.id.gr9);
-        Button bdibtn9_1 = (Button)findViewById(R.id.bdiBtn9_1);
-        Button bdibtn9_2 = (Button)findViewById(R.id.bdiBtn9_2);
-        Button bdibtn9_3 = (Button)findViewById(R.id.bdiBtn9_3);
-        Button bdibtn9_4 = (Button)findViewById(R.id.bdiBtn9_4);
-        bdibtn9_1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr9.getCheckedRadioButtonId();
-                RadioButton btnbdi1 = (RadioButton) findViewById(id);
-            }
-        });
-        bdibtn9_2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr9.getCheckedRadioButtonId();
-                RadioButton btnbdi2 = (RadioButton) findViewById(id);
-                bdiSum++;
-            }
-        });
-        bdibtn9_3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr9.getCheckedRadioButtonId();
-                RadioButton btnbdi3 = (RadioButton) findViewById(id);
-                bdiSum+=2;
-            }
-        });
-        bdibtn9_4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr9.getCheckedRadioButtonId();
-                RadioButton btnbdi4 = (RadioButton) findViewById(id);
-                bdiSum+=3;
-            }
-        });
+        RadioGroup gr4 = (RadioGroup)findViewById(R.id.gr4);
+        radioButtonID = gr4.getCheckedRadioButtonId();
+        radioButton = gr4.findViewById(radioButtonID);
+        selectedId = gr4.indexOfChild(radioButton);
+        selected = String.valueOf(selectedId);
+        bdi_save_data("Q4", selectedId);
+        add_sum(selectedId);
 
-        //10
-        final RadioGroup gr10 = (RadioGroup)findViewById(R.id.gr10);
-        Button bdibtn10_1 = (Button)findViewById(R.id.bdiBtn10_1);
-        Button bdibtn10_2 = (Button)findViewById(R.id.bdiBtn10_2);
-        Button bdibtn10_3 = (Button)findViewById(R.id.bdiBtn10_3);
-        Button bdibtn10_4 = (Button)findViewById(R.id.bdiBtn10_4);
-        bdibtn10_1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr10.getCheckedRadioButtonId();
-                RadioButton btnbdi1 = (RadioButton) findViewById(id);
-            }
-        });
-        bdibtn10_2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr10.getCheckedRadioButtonId();
-                RadioButton btnbdi2 = (RadioButton) findViewById(id);
-                bdiSum++;
-            }
-        });
-        bdibtn10_3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr10.getCheckedRadioButtonId();
-                RadioButton btnbdi3 = (RadioButton) findViewById(id);
-                bdiSum+=2;
-            }
-        });
-        bdibtn10_4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr10.getCheckedRadioButtonId();
-                RadioButton btnbdi4 = (RadioButton) findViewById(id);
-                bdiSum+=3;
-            }
-        });
+        RadioGroup gr5 = (RadioGroup)findViewById(R.id.gr5);
+        radioButtonID = gr5.getCheckedRadioButtonId();
+        radioButton = gr5.findViewById(radioButtonID);
+        selectedId = gr5.indexOfChild(radioButton);
+        selected = String.valueOf(selectedId);
+        bdi_save_data("Q5", selectedId);
+        add_sum(selectedId);
 
-        //11
-        final RadioGroup gr11 = (RadioGroup)findViewById(R.id.gr11);
-        Button bdibtn11_1 = (Button)findViewById(R.id.bdiBtn11_1);
-        Button bdibtn11_2 = (Button)findViewById(R.id.bdiBtn11_2);
-        Button bdibtn11_3 = (Button)findViewById(R.id.bdiBtn11_3);
-        Button bdibtn11_4 = (Button)findViewById(R.id.bdiBtn11_4);
-        bdibtn11_1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr11.getCheckedRadioButtonId();
-                RadioButton btnbdi1 = (RadioButton) findViewById(id);
-            }
-        });
-        bdibtn11_2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr11.getCheckedRadioButtonId();
-                RadioButton btnbdi2 = (RadioButton) findViewById(id);
-                bdiSum++;
-            }
-        });
-        bdibtn11_3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr11.getCheckedRadioButtonId();
-                RadioButton btnbdi3 = (RadioButton) findViewById(id);
-                bdiSum+=2;
-            }
-        });
-        bdibtn11_4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr11.getCheckedRadioButtonId();
-                RadioButton btnbdi4 = (RadioButton) findViewById(id);
-                bdiSum+=3;
-            }
-        });
+        RadioGroup gr6 = (RadioGroup)findViewById(R.id.gr6);
+        radioButtonID = gr6.getCheckedRadioButtonId();
+        radioButton = gr6.findViewById(radioButtonID);
+        selectedId = gr6.indexOfChild(radioButton);
+        selected = String.valueOf(selectedId);
+        bdi_save_data("Q6", selectedId);
+        add_sum(selectedId);
 
-        //12
-        final RadioGroup gr12 = (RadioGroup)findViewById(R.id.gr12);
-        Button bdibtn12_1 = (Button)findViewById(R.id.bdiBtn12_1);
-        Button bdibtn12_2 = (Button)findViewById(R.id.bdiBtn12_2);
-        Button bdibtn12_3 = (Button)findViewById(R.id.bdiBtn12_3);
-        Button bdibtn12_4 = (Button)findViewById(R.id.bdiBtn12_4);
-        bdibtn12_1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr12.getCheckedRadioButtonId();
-                RadioButton btnbdi1 = (RadioButton) findViewById(id);
-            }
-        });
-        bdibtn12_2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr12.getCheckedRadioButtonId();
-                RadioButton btnbdi2 = (RadioButton) findViewById(id);
-                bdiSum++;
-            }
-        });
-        bdibtn12_3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr12.getCheckedRadioButtonId();
-                RadioButton btnbdi3 = (RadioButton) findViewById(id);
-                bdiSum+=2;
-            }
-        });
-        bdibtn12_4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr12.getCheckedRadioButtonId();
-                RadioButton btnbdi4 = (RadioButton) findViewById(id);
-                bdiSum+=3;
-            }
-        });
+        RadioGroup gr7 = (RadioGroup)findViewById(R.id.gr7);
+        radioButtonID = gr7.getCheckedRadioButtonId();
+        radioButton = gr7.findViewById(radioButtonID);
+        selectedId = gr7.indexOfChild(radioButton);
+        selected = String.valueOf(selectedId);
+        bdi_save_data("Q7", selectedId);
+        add_sum(selectedId);
 
-        //13
-        final RadioGroup gr13 = (RadioGroup)findViewById(R.id.gr13);
-        Button bdibtn13_1 = (Button)findViewById(R.id.bdiBtn13_1);
-        Button bdibtn13_2 = (Button)findViewById(R.id.bdiBtn13_2);
-        Button bdibtn13_3 = (Button)findViewById(R.id.bdiBtn13_3);
-        Button bdibtn13_4 = (Button)findViewById(R.id.bdiBtn13_4);
-        bdibtn13_1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr13.getCheckedRadioButtonId();
-                RadioButton btnbdi1 = (RadioButton) findViewById(id);
-            }
-        });
-        bdibtn13_2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr13.getCheckedRadioButtonId();
-                RadioButton btnbdi2 = (RadioButton) findViewById(id);
-                bdiSum++;
-            }
-        });
-        bdibtn13_3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr13.getCheckedRadioButtonId();
-                RadioButton btnbdi3 = (RadioButton) findViewById(id);
-                bdiSum+=2;
-            }
-        });
-        bdibtn13_4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr13.getCheckedRadioButtonId();
-                RadioButton btnbdi4 = (RadioButton) findViewById(id);
-                bdiSum+=3;
-            }
-        });
+        RadioGroup gr8 = (RadioGroup)findViewById(R.id.gr8);
+        radioButtonID = gr8.getCheckedRadioButtonId();
+        radioButton = gr8.findViewById(radioButtonID);
+        selectedId = gr8.indexOfChild(radioButton);
+        selected = String.valueOf(selectedId);
+        bdi_save_data("Q8", selectedId);
+        add_sum(selectedId);
 
-        //14
-        final RadioGroup gr14 = (RadioGroup)findViewById(R.id.gr14);
-        Button bdibtn14_1 = (Button)findViewById(R.id.bdiBtn14_1);
-        Button bdibtn14_2 = (Button)findViewById(R.id.bdiBtn14_2);
-        Button bdibtn14_3 = (Button)findViewById(R.id.bdiBtn14_3);
-        Button bdibtn14_4 = (Button)findViewById(R.id.bdiBtn14_4);
-        bdibtn14_1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr14.getCheckedRadioButtonId();
-                RadioButton btnbdi1 = (RadioButton) findViewById(id);
-            }
-        });
-        bdibtn14_2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr14.getCheckedRadioButtonId();
-                RadioButton btnbdi2 = (RadioButton) findViewById(id);
-                bdiSum++;
-            }
-        });
-        bdibtn14_3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr14.getCheckedRadioButtonId();
-                RadioButton btnbdi3 = (RadioButton) findViewById(id);
-                bdiSum+=2;
-            }
-        });
-        bdibtn14_4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr14.getCheckedRadioButtonId();
-                RadioButton btnbdi4 = (RadioButton) findViewById(id);
-                bdiSum+=3;
-            }
-        });
+        RadioGroup gr9 = (RadioGroup)findViewById(R.id.gr9);
+        radioButtonID = gr9.getCheckedRadioButtonId();
+        radioButton = gr9.findViewById(radioButtonID);
+        selectedId = gr9.indexOfChild(radioButton);
+        selected = String.valueOf(selectedId);
+        bdi_save_data("Q9", selectedId);
+        add_sum(selectedId);
 
-        //15
-        final RadioGroup gr15 = (RadioGroup)findViewById(R.id.gr15);
-        Button bdibtn15_1 = (Button)findViewById(R.id.bdiBtn15_1);
-        Button bdibtn15_2 = (Button)findViewById(R.id.bdiBtn15_2);
-        Button bdibtn15_3 = (Button)findViewById(R.id.bdiBtn15_3);
-        Button bdibtn15_4 = (Button)findViewById(R.id.bdiBtn15_4);
-        bdibtn15_1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr15.getCheckedRadioButtonId();
-                RadioButton btnbdi1 = (RadioButton) findViewById(id);
-            }
-        });
-        bdibtn15_2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr15.getCheckedRadioButtonId();
-                RadioButton btnbdi2 = (RadioButton) findViewById(id);
-                bdiSum++;
-            }
-        });
-        bdibtn15_3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr15.getCheckedRadioButtonId();
-                RadioButton btnbdi3 = (RadioButton) findViewById(id);
-                bdiSum+=2;
-            }
-        });
-        bdibtn15_4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr15.getCheckedRadioButtonId();
-                RadioButton btnbdi4 = (RadioButton) findViewById(id);
-                bdiSum+=3;
-            }
-        });
+        RadioGroup gr10 = (RadioGroup)findViewById(R.id.gr10);
+        radioButtonID = gr10.getCheckedRadioButtonId();
+        radioButton = gr10.findViewById(radioButtonID);
+        selectedId = gr10.indexOfChild(radioButton);
+        selected = String.valueOf(selectedId);
+        bdi_save_data("Q10", selectedId);
+        add_sum(selectedId);
 
-        //16
-        final RadioGroup gr16 = (RadioGroup)findViewById(R.id.gr16);
-        Button bdibtn16_1 = (Button)findViewById(R.id.bdiBtn16_1);
-        Button bdibtn16_2 = (Button)findViewById(R.id.bdiBtn16_2);
-        Button bdibtn16_3 = (Button)findViewById(R.id.bdiBtn16_3);
-        Button bdibtn16_4 = (Button)findViewById(R.id.bdiBtn16_4);
-        bdibtn16_1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr16.getCheckedRadioButtonId();
-                RadioButton btnbdi1 = (RadioButton) findViewById(id);
-            }
-        });
-        bdibtn16_2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr16.getCheckedRadioButtonId();
-                RadioButton btnbdi2 = (RadioButton) findViewById(id);
-                bdiSum++;
-            }
-        });
-        bdibtn16_3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr16.getCheckedRadioButtonId();
-                RadioButton btnbdi3 = (RadioButton) findViewById(id);
-                bdiSum+=2;
-            }
-        });
-        bdibtn16_4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr16.getCheckedRadioButtonId();
-                RadioButton btnbdi4 = (RadioButton) findViewById(id);
-                bdiSum+=3;
-            }
-        });
+        RadioGroup gr11 = (RadioGroup)findViewById(R.id.gr11);
+        radioButtonID = gr11.getCheckedRadioButtonId();
+        radioButton = gr11.findViewById(radioButtonID);
+        selectedId = gr11.indexOfChild(radioButton);
+        selected = String.valueOf(selectedId);
+        bdi_save_data("Q11", selectedId);
+        add_sum(selectedId);
 
-        //17
-        final RadioGroup gr17 = (RadioGroup)findViewById(R.id.gr17);
-        Button bdibtn17_1 = (Button)findViewById(R.id.bdiBtn17_1);
-        Button bdibtn17_2 = (Button)findViewById(R.id.bdiBtn17_2);
-        Button bdibtn17_3 = (Button)findViewById(R.id.bdiBtn17_3);
-        Button bdibtn17_4 = (Button)findViewById(R.id.bdiBtn17_4);
-        bdibtn17_1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr17.getCheckedRadioButtonId();
-                RadioButton btnbdi1 = (RadioButton) findViewById(id);
-            }
-        });
-        bdibtn17_2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr17.getCheckedRadioButtonId();
-                RadioButton btnbdi2 = (RadioButton) findViewById(id);
-                bdiSum++;
-            }
-        });
-        bdibtn17_3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr17.getCheckedRadioButtonId();
-                RadioButton btnbdi3 = (RadioButton) findViewById(id);
-                bdiSum+=2;
-            }
-        });
-        bdibtn17_4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr17.getCheckedRadioButtonId();
-                RadioButton btnbdi4 = (RadioButton) findViewById(id);
-                bdiSum+=3;
-            }
-        });
+        RadioGroup gr12 = (RadioGroup)findViewById(R.id.gr12);
+        radioButtonID = gr12.getCheckedRadioButtonId();
+        radioButton = gr12.findViewById(radioButtonID);
+        selectedId = gr12.indexOfChild(radioButton);
+        selected = String.valueOf(selectedId);
+        bdi_save_data("Q12", selectedId);
+        add_sum(selectedId);
 
-        //18
-        final RadioGroup gr18 = (RadioGroup)findViewById(R.id.gr18);
-        Button bdibtn18_1 = (Button)findViewById(R.id.bdiBtn18_1);
-        Button bdibtn18_2 = (Button)findViewById(R.id.bdiBtn18_2);
-        Button bdibtn18_3 = (Button)findViewById(R.id.bdiBtn18_3);
-        Button bdibtn18_4 = (Button)findViewById(R.id.bdiBtn18_4);
-        bdibtn18_1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr18.getCheckedRadioButtonId();
-                RadioButton btnbdi1 = (RadioButton) findViewById(id);
-            }
-        });
-        bdibtn18_2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr18.getCheckedRadioButtonId();
-                RadioButton btnbdi2 = (RadioButton) findViewById(id);
-                bdiSum++;
-            }
-        });
-        bdibtn18_3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr18.getCheckedRadioButtonId();
-                RadioButton btnbdi3 = (RadioButton) findViewById(id);
-                bdiSum+=2;
-            }
-        });
-        bdibtn18_4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr18.getCheckedRadioButtonId();
-                RadioButton btnbdi4 = (RadioButton) findViewById(id);
-                bdiSum+=3;
-            }
-        });
+        RadioGroup gr13 = (RadioGroup)findViewById(R.id.gr13);
+        radioButtonID = gr13.getCheckedRadioButtonId();
+        radioButton = gr13.findViewById(radioButtonID);
+        selectedId = gr13.indexOfChild(radioButton);
+        selected = String.valueOf(selectedId);
+        bdi_save_data("Q13", selectedId);
+        add_sum(selectedId);
 
-        //19
-        final RadioGroup gr19 = (RadioGroup)findViewById(R.id.gr19);
-        Button bdibtn19_1 = (Button)findViewById(R.id.bdiBtn19_1);
-        Button bdibtn19_2 = (Button)findViewById(R.id.bdiBtn19_2);
-        Button bdibtn19_3 = (Button)findViewById(R.id.bdiBtn19_3);
-        Button bdibtn19_4 = (Button)findViewById(R.id.bdiBtn19_4);
-        bdibtn19_1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr19.getCheckedRadioButtonId();
-                RadioButton btnbdi1 = (RadioButton) findViewById(id);
-            }
-        });
-        bdibtn19_2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr19.getCheckedRadioButtonId();
-                RadioButton btnbdi2 = (RadioButton) findViewById(id);
-                bdiSum++;
-            }
-        });
-        bdibtn19_3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr19.getCheckedRadioButtonId();
-                RadioButton btnbdi3 = (RadioButton) findViewById(id);
-                bdiSum+=2;
-            }
-        });
-        bdibtn19_4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr19.getCheckedRadioButtonId();
-                RadioButton btnbdi4 = (RadioButton) findViewById(id);
-                bdiSum+=3;
-            }
-        });
+        RadioGroup gr14 = (RadioGroup)findViewById(R.id.gr14);
+        radioButtonID = gr14.getCheckedRadioButtonId();
+        radioButton = gr14.findViewById(radioButtonID);
+        selectedId = gr14.indexOfChild(radioButton);
+        selected = String.valueOf(selectedId);
+        bdi_save_data("Q14", selectedId);
+        add_sum(selectedId);
 
-        //20
-        final RadioGroup gr20 = (RadioGroup)findViewById(R.id.gr20);
-        Button bdibtn20_1 = (Button)findViewById(R.id.bdiBtn20_1);
-        Button bdibtn20_2 = (Button)findViewById(R.id.bdiBtn20_2);
-        Button bdibtn20_3 = (Button)findViewById(R.id.bdiBtn20_3);
-        Button bdibtn20_4 = (Button)findViewById(R.id.bdiBtn20_4);
-        bdibtn20_1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr20.getCheckedRadioButtonId();
-                RadioButton btnbdi1 = (RadioButton) findViewById(id);
-            }
-        });
-        bdibtn20_2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr20.getCheckedRadioButtonId();
-                RadioButton btnbdi2 = (RadioButton) findViewById(id);
-                bdiSum++;
-            }
-        });
-        bdibtn20_3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr20.getCheckedRadioButtonId();
-                RadioButton btnbdi3 = (RadioButton) findViewById(id);
-                bdiSum+=2;
-            }
-        });
-        bdibtn20_4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr20.getCheckedRadioButtonId();
-                RadioButton btnbdi4 = (RadioButton) findViewById(id);
-                bdiSum+=3;
-            }
-        });
+        RadioGroup gr15 = (RadioGroup)findViewById(R.id.gr15);
+        radioButtonID = gr15.getCheckedRadioButtonId();
+        radioButton = gr15.findViewById(radioButtonID);
+        selectedId = gr15.indexOfChild(radioButton);
+        selected = String.valueOf(selectedId);
+        bdi_save_data("Q15", selectedId);
+        add_sum(selectedId);
 
-        //21
-        final RadioGroup gr21 = (RadioGroup)findViewById(R.id.gr21);
-        Button bdibtn21_1 = (Button)findViewById(R.id.bdiBtn21_1);
-        Button bdibtn21_2 = (Button)findViewById(R.id.bdiBtn21_2);
-        Button bdibtn21_3 = (Button)findViewById(R.id.bdiBtn21_3);
-        Button bdibtn21_4 = (Button)findViewById(R.id.bdiBtn21_4);
-        bdibtn20_1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr21.getCheckedRadioButtonId();
-                RadioButton btnbdi1 = (RadioButton) findViewById(id);
-            }
-        });
-        bdibtn21_2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr21.getCheckedRadioButtonId();
-                RadioButton btnbdi2 = (RadioButton) findViewById(id);
-                bdiSum++;
-            }
-        });
-        bdibtn21_3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr21.getCheckedRadioButtonId();
-                RadioButton btnbdi3 = (RadioButton) findViewById(id);
-                bdiSum+=2;
-            }
-        });
-        bdibtn21_4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int id = gr21.getCheckedRadioButtonId();
-                RadioButton btnbdi4 = (RadioButton) findViewById(id);
-                bdiSum+=3;
-            }
-        });
+        RadioGroup gr16 = (RadioGroup)findViewById(R.id.gr16);
+        radioButtonID = gr16.getCheckedRadioButtonId();
+        radioButton = gr16.findViewById(radioButtonID);
+        selectedId = gr16.indexOfChild(radioButton);
+        selected = String.valueOf(selectedId);
+        bdi_save_data("Q16", selectedId);
+        add_sum(selectedId);
+
+        RadioGroup gr17 = (RadioGroup)findViewById(R.id.gr17);
+        radioButtonID = gr17.getCheckedRadioButtonId();
+        radioButton = gr17.findViewById(radioButtonID);
+        selectedId = gr17.indexOfChild(radioButton);
+        selected = String.valueOf(selectedId);
+        bdi_save_data("Q17", selectedId);
+        add_sum(selectedId);
+
+        RadioGroup gr18 = (RadioGroup)findViewById(R.id.gr18);
+        radioButtonID = gr18.getCheckedRadioButtonId();
+        radioButton = gr18.findViewById(radioButtonID);
+        selectedId = gr18.indexOfChild(radioButton);
+        selected = String.valueOf(selectedId);
+        bdi_save_data("Q18", selectedId);
+        add_sum(selectedId);
+
+        RadioGroup gr19 = (RadioGroup)findViewById(R.id.gr19);
+        radioButtonID = gr19.getCheckedRadioButtonId();
+        radioButton = gr19.findViewById(radioButtonID);
+        selectedId = gr19.indexOfChild(radioButton);
+        selected = String.valueOf(selectedId);
+        bdi_save_data("Q19", selectedId);
+        add_sum(selectedId);
+
+        RadioGroup gr20 = (RadioGroup)findViewById(R.id.gr20);
+        radioButtonID = gr20.getCheckedRadioButtonId();
+        radioButton = gr20.findViewById(radioButtonID);
+        selectedId = gr20.indexOfChild(radioButton);
+        selected = String.valueOf(selectedId);
+        bdi_save_data("Q20", selectedId);
+        add_sum(selectedId);
+
+        RadioGroup gr21 = (RadioGroup)findViewById(R.id.gr21);
+        radioButtonID = gr21.getCheckedRadioButtonId();
+        radioButton = gr21.findViewById(radioButtonID);
+        selectedId = gr21.indexOfChild(radioButton);
+        selected = String.valueOf(selectedId);
+        bdi_save_data("Q21", selectedId);
+        add_sum(selectedId);
+
+        bdi_save_data("score",bdiSum);
+
+
+
+    }
+
+    public void bdi_set_data(String questionnum, int answer){
+
+        if(answer==-1){
+            answer=0;
+        }
+        FirebaseFirestore db;
+        db = FirebaseFirestore.getInstance();
+
+        Map<String, Object> newvalue = new HashMap<>();
+        newvalue.put(questionnum, answer);
+
+        db.collection("users").document(user_id).collection("BDI").document("answer").set(newvalue);
+
+    }
+
+    public void bdi_save_data(String questionnum, int answer){
+
+        if(answer==-1){
+            answer=0;
+        }
+        FirebaseFirestore db;
+        db = FirebaseFirestore.getInstance();
+
+        Map<String, Object> newvalue = new HashMap<>();
+        newvalue.put(questionnum, answer);
+
+        db.collection("users").document(user_id).collection("BDI").document("answer").update(newvalue);
+
+    }
+
+    public void bdi_save_stringdata(String questionnum, String answer){
+
+        FirebaseFirestore db;
+        db = FirebaseFirestore.getInstance();
+
+        Map<String, Object> newvalue = new HashMap<>();
+        newvalue.put(questionnum, answer);
+
+        db.collection("users").document(user_id).collection("BDI").document("answer").set(newvalue);
+
+    }
+    public void add_sum(int score){
+        bdiSum = bdiSum + score ;
     }
 }
