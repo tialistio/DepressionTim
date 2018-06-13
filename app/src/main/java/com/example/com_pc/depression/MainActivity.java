@@ -48,32 +48,8 @@ public class MainActivity extends AppCompatActivity {
     public int intcounter;
     public String counter;
     FirebaseFirestore db;
-    //public static String idmake;
-    //public static String user_id;
     //=================================================
     public static String deviceId;
-
-    //안드로이드 UUID 고유번호 가져오기
-    //deviceid, serialnumber,androidid를 추출하여 string을 hash값으로 변경한 int형 변수
-    //3개를 UUID 클래스의 UUID 생성자를 이용해서 생선한 문자열을 고유키를 생성.
-    private String GetDevicesUUID(Context mContext) {
-        final TelephonyManager tm = (TelephonyManager) mContext
-                .getSystemService(Context.TELEPHONY_SERVICE);
-        final String tmDevice, tmSerial, androidId;
-        try {
-            tmDevice = "" + tm.getDeviceId();
-            tmSerial = "" + tm.getSimSerialNumber();
-            androidId = "" + android.provider.Settings.Secure.getString(getContentResolver(),
-                    android.provider.Settings.Secure.ANDROID_ID);
-            UUID deviceUuid = new UUID(androidId.hashCode(),
-                    ((long) tmDevice.hashCode() << 32) | tmSerial.hashCode());
-            deviceId = deviceUuid.toString();
-            return deviceId;
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        }
-        return "";
-    }
 
     //
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -156,7 +132,16 @@ public class MainActivity extends AppCompatActivity {
         //============================== if uuid not null
         Toast.makeText(MainActivity.this, "Id not null", Toast.LENGTH_SHORT).show();
         //==================================================================
-
+        //결과 확인 Intent 이동
+        TextView resultButton = (TextView)findViewById(R.id.resultButton);
+        resultButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                Intent resultIntent = new Intent(MainActivity.this,ResultListActivity.class);
+                MainActivity.this.startActivity(resultIntent);
+            }
+        });
+        //사용 설명서 Intent 이동
         TextView manualButton = (TextView) findViewById(R.id.manualButton);
         manualButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -165,6 +150,7 @@ public class MainActivity extends AppCompatActivity {
                 MainActivity.this.startActivity(manualIntent);
             }
         });
+        //진단 시작버튼 //06.12 수정
         TextView diagButton = (TextView) findViewById(R.id.diagButton);
         diagButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -174,15 +160,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //결과 확인 Intent 이동
-        TextView resultButton = (TextView)findViewById(R.id.resultButton);
-        resultButton.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view){
-                //Intent resultIntent = new Intent(MainActivity.this,ResultListActivity.class);
-                //MainActivity.this.startActivity(resultIntent);
-            }
-        });
     }
 
     public int get_counter() {

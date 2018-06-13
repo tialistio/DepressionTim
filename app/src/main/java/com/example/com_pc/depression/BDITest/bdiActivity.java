@@ -60,7 +60,6 @@ public class bdiActivity extends AppCompatActivity {
         });
 //============================================================================================
 
-
         //==========================================================================================
     }
     public String get_score(){
@@ -75,6 +74,11 @@ public class bdiActivity extends AppCompatActivity {
     }
 
     public void upload_score(){
+
+        Date currentTime = Calendar.getInstance().getTime();
+        String date = currentTime.toString();
+        bdi_save_stringdata("date", date);
+
         RadioGroup gr1 = (RadioGroup)findViewById(R.id.gr1);
         radioButtonID = gr1.getCheckedRadioButtonId();
         radioButton = gr1.findViewById(radioButtonID);
@@ -246,13 +250,24 @@ public class bdiActivity extends AppCompatActivity {
 
         bdi_save_data("score",bdiSum);
 
-        Date currentTime = Calendar.getInstance().getTime();
-        String date = currentTime.toString();
-        bdi_save_stringdata("date", date);
+
 
     }
 
+    public void bdi_set_data(String questionnum, int answer){
 
+        if(answer==-1){
+            answer=0;
+        }
+        FirebaseFirestore db;
+        db = FirebaseFirestore.getInstance();
+
+        Map<String, Object> newvalue = new HashMap<>();
+        newvalue.put(questionnum, answer);
+
+        db.collection("users").document(user_id).collection("BDI").document("answer").set(newvalue);
+
+    }
 
     public void bdi_save_data(String questionnum, int answer){
 
@@ -277,7 +292,7 @@ public class bdiActivity extends AppCompatActivity {
         Map<String, Object> newvalue = new HashMap<>();
         newvalue.put(questionnum, answer);
 
-        db.collection("users").document(user_id).collection("BDI").document("answer").update(newvalue);
+        db.collection("users").document(user_id).collection("BDI").document("answer").set(newvalue);
 
     }
     public void add_sum(int score){

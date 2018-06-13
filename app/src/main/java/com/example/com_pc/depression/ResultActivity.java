@@ -31,31 +31,28 @@ final int count=0; //bdi 3번의 점수를 평균 낸 점수
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_result);
         Intent intent = getIntent();
-        TextView tt1 = (TextView)findViewById(R.id.tt1);
-        TextView tt2 = (TextView)findViewById(R.id.tt2);
-        TextView tt3 = (TextView)findViewById(R.id.tt3);
+        TextView tt1 = (TextView)findViewById(R.id.tt0);  //수정
         tt1.setText(intent.getStringExtra("Title"));
-       // tt2.setText(intent.getStringExtra("date"));
+        // tt2.setText(intent.getStringExtra("date"));
         if(count<=9)
-            tt2.setText("우울하지 않은 상태입니다.");
+            tt1.setText("우울하지 않은 상태입니다.");
         else if(count>=10&&count<=15) {
-            tt2.setText("가벼운 우울 상태입니다.");
+            tt1.setText("가벼운 우울 상태입니다.");
         }
         else if(count>=16&&count<=23) {
-            tt2.setText("가벼운 우울 상태입니다.");
+            tt1.setText("가벼운 우울 상태입니다.");
         }
         else
-            tt2.setText("심각한 우울 상태입니다.");
+            tt1.setText("심각한 우울 상태입니다."); // 여기까지 ! (마지막 BDI 진단 값을 받아서 출력해주어야해요!)
         drawChart();
     }
 
 
-    private void drawChart() {
+    private void drawChart() { // drawChart 함수는 모두 복사해서 붙여넣기 해주시면 될거 같아요~
 
         int[] x = {0, 1, 2};
         int[] income = {40, 20, 35};
-        XYSeries incomeSeries = new
-                XYSeries("");
+        XYSeries incomeSeries = new XYSeries("");
         // Creating an XYSeries for Expense
         XYSeries expenseSeries = new XYSeries("");
         // Adding data to Income and Expense Series
@@ -74,7 +71,7 @@ final int count=0; //bdi 3번의 점수를 평균 낸 점수
         XYSeriesRenderer incomeRenderer = new XYSeriesRenderer();
         incomeRenderer.setColor(Color.rgb(233,150,122)); //color of the graph set to cyan
         incomeRenderer.setFillPoints(true);
-        incomeRenderer.setLineWidth(2);
+        incomeRenderer.setLineWidth(1);
         incomeRenderer.setDisplayChartValues(true);
         incomeRenderer.setDisplayChartValuesDistance(10); //setting chart value distance
 
@@ -93,7 +90,6 @@ final int count=0; //bdi 3번의 점수를 평균 낸 점수
         multiRenderer.setOrientation(XYMultipleSeriesRenderer.Orientation.HORIZONTAL);
         multiRenderer.setXLabels(0);
         multiRenderer.setXLabelsColor(Color.WHITE);
-        multiRenderer.setAxesColor(Color.BLACK);
         multiRenderer.setChartTitle("우울증 진단 최종 결과");
         multiRenderer.setXTitle("");
         multiRenderer.setYTitle("");
@@ -121,7 +117,9 @@ final int count=0; //bdi 3번의 점수를 평균 낸 점수
         multiRenderer.setAntialiasing(true);
         //setting to in scroll to false
         multiRenderer.setInScroll(false);
-
+        multiRenderer.setZoomEnabled(false, false);
+        multiRenderer.setZoomEnabled(false);
+        multiRenderer.setExternalZoomEnabled(false);
         //setting to set legend height of the graph
 
         multiRenderer.setLegendHeight(30);
@@ -137,14 +135,16 @@ final int count=0; //bdi 3번의 점수를 평균 낸 점수
         multiRenderer.setTextTypeface("bold", Typeface.NORMAL);
         //setting no of values to display in y axis
         multiRenderer.setYLabels(10);
+        multiRenderer.setXLabelsColor(Color.WHITE);
         multiRenderer.setYAxisMin(0);
         multiRenderer.setYAxisMax(63);
         //xaxiz에서. 5로 그래프를 오른쪽으로 이동하는 데 사용되는 설정
-        multiRenderer.setXAxisMin(-0.5);
+        multiRenderer.setXAxisMin(-0.7);
         // x축 갯수
-        multiRenderer.setXAxisMax(2);
+        multiRenderer.setXAxisMax(2.5);
         // 막대 사이 공간
-        multiRenderer.setBarSpacing(0.3);
+        multiRenderer.setBarSpacing(0.1);
+        // multiRenderer.setBarWidth(2);
 
         // 그래프 배경색 투명하게
         multiRenderer.setBackgroundColor(Color.TRANSPARENT);
@@ -175,5 +175,4 @@ final int count=0; //bdi 3번의 점수를 평균 낸 점수
                 LinearLayout.LayoutParams.WRAP_CONTENT));
 
     }
-
 }

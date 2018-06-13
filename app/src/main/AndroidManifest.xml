@@ -5,6 +5,10 @@
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -25,6 +29,15 @@
         <activity android:name=".BDITest.bdiActivity" />
         <activity android:name=".BDITest.bdiFinish" />
         <activity android:name=".BDITest.bdiStart" />
+        <activity android:name=".ResultActivity" />
+        <activity android:name=".ResultListActivity" />
+        <activity android:name=".SplashScreen"> //여기서부터
+        <intent-filter>
+            <action
+                android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter> //여기까지 추가했습니다.
+        </activity>
     </application>
 
 </manifest>
